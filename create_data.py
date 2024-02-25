@@ -9,7 +9,10 @@ def create_tables(cursor):
     CREATE TABLE IF NOT EXISTS students (
         id INTEGER PRIMARY KEY,
         name TEXT,
-        group_id INTEGER
+        group_id INTEGER,
+        FOREIGN KEY (group_id) REFERENCES groups(id)
+            ON DELETE SET NULL
+            ON UPDATE CASCADE
     )
     ''')
     
@@ -31,7 +34,10 @@ def create_tables(cursor):
     CREATE TABLE IF NOT EXISTS subjects (
         id INTEGER PRIMARY KEY,
         name TEXT,
-        teacher_id INTEGER
+        teacher_id INTEGER,
+        FOREIGN KEY (teacher_id) REFERENCES teachers(id)
+            ON DELETE SET NULL
+            ON UPDATE CASCADE
     )
     ''')
 
@@ -41,7 +47,13 @@ def create_tables(cursor):
         student_id INTEGER,
         subject_id INTEGER,
         grade INTEGER,
-        date TEXT
+        date TEXT,
+        FOREIGN KEY (student_id) REFERENCES students(id)
+            ON DELETE SET NULL
+            ON UPDATE CASCADE,
+        FOREIGN KEY (subject_id) REFERENCES subjects(id)
+            ON DELETE SET NULL
+            ON UPDATE CASCADE
     )
     ''')
 
@@ -75,13 +87,16 @@ def populate_tables(cursor, connection):
             cursor.execute("INSERT INTO grades (student_id, subject_id, grade, date) VALUES (?, ?, ?, ?)", (student_id, subject_id, grade, date))
     connection.commit()
 
-connection = sqlite3.connect('university.db')
-cursor = connection.cursor()
+def main():
+    connection = sqlite3.connect('university.db')
+    cursor = connection.cursor()
 
-create_tables(cursor)
+    create_tables(cursor)
+    populate_tables(cursor, connection)
 
-populate_tables(cursor, connection)
+    connection.close()
 
-connection.close()
+    print("Базу даних успішно створено та заповнено випадковими даними.")
 
-print("Базу даних успішно створено та заповнено випадковими даними.")
+if __name__ == "__main__":
+    main()
